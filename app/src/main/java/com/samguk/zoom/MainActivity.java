@@ -1,12 +1,18 @@
 package com.samguk.zoom;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
+
+import com.samguk.zoom.features.camera.CameraManager;
 
 public class MainActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CAMERA = 100001;
@@ -15,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //사용 가능할떄
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
         {
             if(checkSelfPermission(Manifest.permission.CAMERA)!= PackageManager.PERMISSION_GRANTED)
@@ -23,6 +30,22 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
         }
+
+        //사용 불가능할때
+        CameraManager manager = CameraManager.getCameraManager();
+        if (!manager.checkCameraUsable(this)) { //사용 가능한가?
+            new AlertDialog.Builder( this)
+                    .setMessage("카메라가 사용 안된다구~~.")
+                    .setNeutralButton( "종료", new DialogInterface.OnClickListener() {
+                          @Override
+                          public void onClick(DialogInterface dialog, int which) {
+                                System.exit( 0);
+                         }
+                     })
+                     .show();
+
+        }
+
     }
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
