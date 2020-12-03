@@ -11,6 +11,7 @@ import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.FrameLayout;
 
 import com.samguk.zoom.features.camera.CameraManager;
@@ -30,7 +31,10 @@ public class MainActivity extends AppCompatActivity {
                 requestPermissions(new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST_CAMERA);
                 return;
             }
+
+
         }
+
         CameraManager manager = CameraManager.getCameraManager();
         if (!manager.checkCameraUsable(this)) {
             new AlertDialog.Builder(this)
@@ -49,7 +53,6 @@ public class MainActivity extends AppCompatActivity {
         preview.addView(cameraPreview);
     }
 
-
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case PERMISSION_REQUEST_CAMERA:
@@ -62,5 +65,11 @@ public class MainActivity extends AppCompatActivity {
             default:
                 break;
         }
+    }
+
+    public void changeCamera(View view) {
+        CameraManager manager = CameraManager.getCameraManager();
+        Camera camera = manager.getNextCamera();
+        cameraPreview.changeCamera(camera);
     }
 }
