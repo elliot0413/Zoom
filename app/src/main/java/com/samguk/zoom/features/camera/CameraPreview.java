@@ -1,5 +1,6 @@
 package com.samguk.zoom.features.camera;
 
+
 import android.app.Activity;
 import android.content.Context;
 import android.hardware.Camera;
@@ -20,7 +21,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         this.camera = camera;
 
         this.holder = getHolder();
-        this.holder.addCallback((this));
+        this.holder.addCallback(this);
         this.holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
     }
 
@@ -31,7 +32,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             this.camera.setDisplayOrientation(getDegree());
             this.camera.startPreview();
         } catch (IOException e) {
-            Log.d("cameraPreview", "미리보기 생성 실패" + e.getMessage());
+            Log.d("CameraPreview", "미리보기 생성 실패: " + e.getMessage());
         }
     }
 
@@ -51,10 +52,12 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             this.camera.setPreviewDisplay(this.holder);
             this.camera.setDisplayOrientation(getDegree());
             this.camera.startPreview();
+
         } catch (Exception e) {
-            Log.d("CameraPreview", "미리보기 생성 실패" + e.getMessage());
+            Log.d("cameraPreview", "미리보기 생성 실패: " + e.getMessage());
         }
     }
+
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
@@ -73,6 +76,32 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
                 return 0;
             default:
                 return 90;
+
         }
     }
+
+    public void changeCamera(Camera newCamera) {
+        try {
+            this.camera.stopPreview();
+            this.camera.release();
+            this.camera = null;
+        } catch (Exception e) {
+
+        }
+        try {
+            newCamera.setPreviewDisplay(this.holder);
+            newCamera.setDisplayOrientation(getDegree());
+            newCamera.startPreview();
+            this.camera = newCamera;
+        } catch (Exception e) {
+            Log.e("Camerapreview", "미리보기 변경 실패" + e.getMessage());
+
+        }
+
+    }
+
+
 }
+
+
+
