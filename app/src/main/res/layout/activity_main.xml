@@ -34,7 +34,10 @@
                 android:layout_gravity="center"
                 android:onClick="changeCamera"
                 android:text="카메라 변경" />
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9c32529... 저장소 권한 받기
         </LinearLayout>
     </LinearLayout>
 

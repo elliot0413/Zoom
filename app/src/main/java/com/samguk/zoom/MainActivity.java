@@ -19,26 +19,34 @@ import com.samguk.zoom.features.camera.CameraPreview;
 
 public class MainActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CAMERA = 100001;
+    private static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 100002;
+
     private CameraPreview cameraPreview;
+    private Camera camera;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //사용 가능할떄
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST_CAMERA);
                 return;
             }
-
+            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE);
+                return;
+            }
 
         }
 
+        //사용 불가능할때
         CameraManager manager = CameraManager.getCameraManager();
-        if (!manager.checkCameraUsable(this)) {
+        if (!manager.checkCameraUsable(this)) { //사용 가능한가?
             new AlertDialog.Builder(this)
-                    .setMessage("카메라가 사용 불가합니다")
+                    .setMessage("카메라가 사용 안됩니다.")
                     .setNeutralButton("종료", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -46,7 +54,9 @@ public class MainActivity extends AppCompatActivity {
                         }
                     })
                     .show();
+
         }
+
         Camera camera = manager.getCamera();
         cameraPreview = new CameraPreview(this, camera);
         FrameLayout preview = findViewById(R.id.camera_preview);
@@ -55,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
+            case PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE:
             case PERMISSION_REQUEST_CAMERA:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     recreate();

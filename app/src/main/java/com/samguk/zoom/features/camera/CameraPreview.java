@@ -1,5 +1,6 @@
 package com.samguk.zoom.features.camera;
 
+
 import android.app.Activity;
 import android.content.Context;
 import android.hardware.Camera;
@@ -50,10 +51,12 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             this.camera.setPreviewDisplay(this.holder);
             this.camera.setDisplayOrientation(getDegree());
             this.camera.startPreview();
+
         } catch (Exception e) {
             Log.d("CameraPreview", "미리보기 생성 실패: " + e.getMessage());
         }
     }
+
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
@@ -72,7 +75,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
                 return 0;
             default:
                 return 90;
-
         }
     }
 

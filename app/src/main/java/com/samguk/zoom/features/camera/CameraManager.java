@@ -50,13 +50,13 @@ public class CameraManager {
     public Camera getNextCamera() {
         Camera camera = null;
         try {
-            camera = Camera.open((currentCamera + 1) % maxCamera);
+            currentCamera = (currentCamera + 1) % maxCamera;
+            camera = Camera.open(currentCamera);
             Camera.Parameters cameraParameters = camera.getParameters();
             if (cameraParameters.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
                 cameraParameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
                 camera.setParameters(cameraParameters);
             }
-
         } catch (Exception ex) {
             Log.e("CameraManager", ex.toString());
             System.exit(1);
