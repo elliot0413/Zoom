@@ -26,7 +26,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="촬영" />
+                android:text="촬영"
+                android:onClick="takePicture" />
 
             <Button
                 android:layout_width="wrap_content"
@@ -34,10 +35,6 @@
                 android:layout_gravity="center"
                 android:onClick="changeCamera"
                 android:text="카메라 변경" />
-<<<<<<< HEAD
-
-=======
->>>>>>> 9c32529... 저장소 권한 받기
         </LinearLayout>
     </LinearLayout>
 

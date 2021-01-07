@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import com.samguk.zoom.features.camera.CameraManager;
 import com.samguk.zoom.features.camera.CameraPreview;
@@ -61,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
         cameraPreview = new CameraPreview(this, camera);
         FrameLayout preview = findViewById(R.id.camera_preview);
         preview.addView(cameraPreview);
+        this.camera = camera;
     }
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -82,5 +84,11 @@ public class MainActivity extends AppCompatActivity {
         CameraManager manager = CameraManager.getCameraManager();
         Camera camera = manager.getNextCamera();
         cameraPreview.changeCamera(camera);
+    }
+
+    public void takePicture(View view) {
+        CameraManager cameraManager = CameraManager.getCameraManager();
+        cameraManager.takeAndSaveImage(this.camera);
+        Toast.makeText(this, "저장완료", Toast.LENGTH_LONG).show();
     }
 }
