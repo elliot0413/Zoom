@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.samguk.zoom.features.camera.CameraManager;
@@ -22,6 +23,8 @@ import com.samguk.zoom.features.camera.CameraPreview;
 import com.samguk.zoom.features.camera.CameraStreamView;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CAMERA = 100001;
@@ -29,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
 
     private CameraPreview cameraPreview;
     private Camera camera;
+
+    private List<CameraStreamView> streamViewList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,12 +69,16 @@ public class MainActivity extends AppCompatActivity {
         }
 
         Camera camera = manager.getCamera();
+
         cameraPreview = new CameraPreview(this, camera);
         FrameLayout preview = findViewById(R.id.camera_preview);
         preview.addView(cameraPreview);
-        this.camera = camera;
-        FrameLayout preview2 = findViewById(R.id.camera_preview_second);
-        final CameraStreamView streamView = new CameraStreamView(this);
+
+        CameraStreamView streamView = new CameraStreamView(this);
+        streamView.initialize();
+        LinearLayout streamList = findViewById(R.id.stream_list);
+        streamList.addView(streamView);
+        this.streamViewList.add(streamView);
 
         camera.setPreviewCallback(new Camera.PreviewCallback(){
             @Override
@@ -88,7 +97,8 @@ public class MainActivity extends AppCompatActivity {
                 streamView.drawStream(bytes);
             }
         });
-        preview2.addView(streamView);
+
+        this.camera = camera;
     }
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -107,36 +117,46 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void changeCamera(View view) {
-        CameraManager manager = CameraManager.getCameraManager();
-        Camera camera = manager.getNextCamera();
-        cameraPreview.changeCamera(camera);
-        FrameLayout preview2 = findViewById(R.id.camera_preview_second);
-        preview2.removeAllViews();
-        final CameraStreamView streamView = new CameraStreamView(this);
+       CameraManager manager = CameraManager.getCameraManager();
+       Camera camera = manager.getNextCamera();
+       cameraPreview.changeCamera(camera);
 
-        camera.setPreviewCallback(new Camera.PreviewCallback(){
-            @Override
-            public void onPreviewFrame(byte[] data, Camera camera) {
-                Camera.Parameters parameters = camera.getParameters();
-                int width = parameters.getPreviewSize().width;
-                int height = parameters.getPreviewSize().height;
-
-                YuvImage yuv = new YuvImage(data, parameters.getPreviewFormat(), width, height, null);
-
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                yuv.compressToJpeg(new Rect(0, 0, width, height), 50, out);
-
-                byte[] bytes = out.toByteArray();
-
-                streamView.drawStream(bytes);
+       camera.setPreviewCallback(new Camera.PreviewCallback() {
+           @Override
+           public void onPreviewFrame(byte[] data, Camera camera) {
+               MainActivity.this.updateStreamView(data, camera);
             }
         });
-        preview2.addView(streamView);
     }
 
     public void takePicture(View view) {
         CameraManager cameraManager = CameraManager.getCameraManager();
         cameraManager.takeAndSaveImage(this.camera);
         Toast.makeText(this, "저장완료", Toast.LENGTH_LONG).show();
+    }
+    
+    public void addStreamView(View view) {
+        final CameraStreamView streamView = new CameraStreamView(this);
+        streamView.initialize();
+        this.streamViewList.add(streamView);
+        LinearLayout streamLayout = findViewById(R.id.stream_list);
+        streamLayout.addView(streamView);
+
+    }
+    
+    public void updateStreamView(byte[] data, Camera camera) {
+        Camera.Parameters parameters = camera.getParameters();
+        int width = parameters.getPreviewSize().width;
+        int height = parameters.getPreviewSize().height;
+        
+        YuvImage yuv = new YuvImage(data, parameters.getPreviewFormat(),width,height,null);
+        
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        yuv.compressToJpeg(new Rect(0,0,width,height),50,out);
+        
+        byte[] bytes = out.toByteArray();
+        for(CameraStreamView stream : this.streamViewList){
+            stream.drawStream(bytes);
+        }
     }
 }
