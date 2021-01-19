@@ -123,4 +123,6 @@ public class CameraManager {
     public void takeAndSaveImage(Camera camera) {
         camera.takePicture(null,null, getTakePictureCallback());
     }
+
+
 }

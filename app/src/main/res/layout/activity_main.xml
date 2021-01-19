@@ -15,7 +15,8 @@
             android:id="@+id/camera_preview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            />
 
         <HorizontalScrollView
             android:id="@+id/camera_preview_second"
@@ -39,7 +40,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="촬영"
-                android:onClick="takePicture" />
+                android:onClick="takePicture"/>
 
             <Button
                 android:layout_width="wrap_content"
@@ -56,6 +57,4 @@
                 />
         </LinearLayout>
     </LinearLayout>
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>

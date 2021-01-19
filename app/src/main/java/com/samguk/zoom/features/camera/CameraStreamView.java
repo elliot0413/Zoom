@@ -31,13 +31,13 @@ public class CameraStreamView extends TextureView implements CameraStreamCallbac
         Bitmap rotatedImage = Bitmap.createBitmap(drawableImage, 0, 0, drawableImage.getWidth(),
                 drawableImage.getHeight(), matrix, false);
 
-        if (rotatedImage == null) {
-            return;
-        }
+        Bitmap scaledImage = Bitmap.createScaledBitmap(rotatedImage, 360, 270, false);
 
         Canvas canvas = this.lockCanvas();
-        canvas.drawBitmap(rotatedImage, 0, 0, null);
-        this.unlockCanvasAndPost(canvas);
+        if (canvas != null) {
+            canvas.drawBitmap(rotatedImage, 0, 0, null);
+            this.unlockCanvasAndPost(canvas);
+        }
     }
 
     public void initialize() {

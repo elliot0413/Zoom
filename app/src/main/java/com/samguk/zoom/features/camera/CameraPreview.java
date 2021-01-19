@@ -58,7 +58,15 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
+        try{
+            this.camera.stopPreview();
+            this.camera.setPreviewCallback(null);
+            this.camera.release();
+            this.camera = null;
 
+        }catch (Exception e){
+
+        }
     }
 
     private int getDegree() {
@@ -79,6 +87,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     public void changeCamera(Camera newCamera) {
         try {
             this.camera.stopPreview();
+            this.camera.setPreviewCallback(null);
             this.camera.release();
             this.camera = null;
         } catch (Exception e) {
