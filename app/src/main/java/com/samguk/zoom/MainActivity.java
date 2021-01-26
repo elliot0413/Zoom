@@ -14,6 +14,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -32,7 +33,6 @@ public class MainActivity extends AppCompatActivity {
 
     private CameraPreview cameraPreview;
     private Camera camera;
-
     private List<CameraStreamView> streamViewList = new ArrayList<>();
 
     @Override
@@ -74,11 +74,7 @@ public class MainActivity extends AppCompatActivity {
         FrameLayout preview = findViewById(R.id.camera_preview);
         preview.addView(cameraPreview);
 
-        CameraStreamView streamView = new CameraStreamView(this);
-        streamView.initialize();
-        LinearLayout streamList = findViewById(R.id.stream_list);
-        streamList.addView(streamView);
-        this.streamViewList.add(streamView);
+        this.addStreamView(null);
 
         camera.setPreviewCallback(new Camera.PreviewCallback() {
             @Override
@@ -107,9 +103,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void changeCamera(View view) {
-       CameraManager manager = CameraManager.getCameraManager();
-       Camera camera = manager.getNextCamera();
-       cameraPreview.changeCamera(camera);
+        CameraManager manager = CameraManager.getCameraManager();
+        Camera camera = manager.getNextCamera();
+        cameraPreview.changeCamera(camera);
 
         camera.setPreviewCallback(new Camera.PreviewCallback() {
             @Override
@@ -128,24 +124,43 @@ public class MainActivity extends AppCompatActivity {
 
     public void addStreamView(View View) {
         final CameraStreamView streamView = new CameraStreamView(this);
-        streamView.initialize();
         this.streamViewList.add(streamView);
         LinearLayout streamLayout = findViewById(R.id.stream_list);
-        streamLayout.addView(streamView);
+        final LinearLayout userView = new LinearLayout(this);
+        userView.setOrientation(LinearLayout.VERTICAL);
+        Button closeButton = new Button(this);
+        userView.addView(streamView);
+        userView.addView(closeButton);
+        streamLayout.addView(userView);
+        closeButton.setText("종료");
+        closeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.this.removeStreamView(userView, streamView);
+            }
+        });
     }
 
     public void updateStreamView(byte[] data, Camera camera) {
         Camera.Parameters parameters = camera.getParameters();
         int width = parameters.getPreviewSize().width;
         int height = parameters.getPreviewSize().height;
-        YuvImage yuv = new YuvImage(data, parameters.getPreviewFormat(),width,height,null);
-        
+        YuvImage yuv = new YuvImage(data, parameters.getPreviewFormat(), width, height, null);
+
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        yuv.compressToJpeg(new Rect(0,0,width,height),50,out);
-        
+        yuv.compressToJpeg(new Rect(0, 0, width, height), 50, out);
+
         byte[] bytes = out.toByteArray();
-        for(CameraStreamView stream : this.streamViewList){
-            stream.drawStream(bytes);
+        CameraManager manager = CameraManager.getCameraManager();
+
+        for (CameraStreamView stream : this.streamViewList) {
+            stream.drawStream(bytes, parameters.getJpegThumbnailSize(), manager.isFrontCamera());
         }
+    }
+
+    public void removeStreamView(LinearLayout view, CameraStreamView streamView) {
+        LinearLayout streamLayout = findViewById(R.id.stream_list);
+        streamLayout.removeViewInLayout(view);
+        this.streamViewList.remove(streamView);
     }
 }
