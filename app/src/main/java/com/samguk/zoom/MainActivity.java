@@ -178,12 +178,11 @@ public class MainActivity extends AppCompatActivity {
         this.streamViewList.remove(streamView);
     }
 
-    public void SendTextView(View view)
-    {
-        EditText SendTextView = findViewById(R.id.message_edit);
-        getText(SendTextView)
-
+    public void sendMessage(View view) {
+        EditText editText = findViewById(R.id.message_edit);
+        String message = editText.getText().toString();
+        this.chatTextAdapter.addMessage(message);
+        this.chatTextAdapter.notifyDataSetChanged();
+        editText.setText(" ");
     }
-
-
 }
