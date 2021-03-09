@@ -12,6 +12,8 @@ import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -25,6 +27,7 @@ import android.widget.Toast;
 import com.samguk.zoom.features.camera.CameraManager;
 import com.samguk.zoom.features.camera.CameraPreview;
 import com.samguk.zoom.features.camera.CameraStreamView;
+import com.samguk.zoom.features.chat.ChatClient;
 import com.samguk.zoom.features.chat.ChatTextAdapter;
 
 import java.io.ByteArrayOutputStream;
@@ -34,12 +37,14 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CAMERA = 100001;
     private static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 100002;
+    private static final int PERMISSION_REQUEST_INTERNET=100003;
 
     private CameraPreview cameraPreview;
     private Camera camera;
 
     private List<CameraStreamView> streamViewList = new ArrayList<>();
     private ChatTextAdapter chatTextAdapter;
+    private ChatClient chatClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +59,10 @@ public class MainActivity extends AppCompatActivity {
             }
             if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE);
+                return;
+            }
+            if (checkSelfPermission(Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.INTERNET}, PERMISSION_REQUEST_INTERNET);
                 return;
             }
 
@@ -99,11 +108,15 @@ public class MainActivity extends AppCompatActivity {
         chatList.setAdapter(this.chatTextAdapter);
 
         preview.addView(chatList);
+
+        this.chatClient = new ChatClient(this.getMessageHandler());
+        this.chatClient.send("hello?");
     }
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE:
+            case PERMISSION_REQUEST_INTERNET:
             case PERMISSION_REQUEST_CAMERA:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     recreate();
@@ -184,5 +197,17 @@ public class MainActivity extends AppCompatActivity {
         this.chatTextAdapter.addMessage(message);
         this.chatTextAdapter.notifyDataSetChanged();
         editText.setText(" ");
+    }
+
+    public Handler getMessageHandler(){
+        return new Handler(new Handler.Callback(){
+            @Override
+            public boolean handleMessage(@NonNull Message msg){
+                String message = (String) msg.obj;
+                chatTextAdapter.addMessage(message);
+                chatTextAdapter.notifyDataSetChanged();
+                return true;
+            }
+        });
     }
 }
