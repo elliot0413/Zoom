@@ -4,7 +4,11 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import org.json.JSONArray;
+
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
@@ -39,7 +43,27 @@ public class ChatClient {
                 @Override
                 public void call(Object... args) {
                     Message message = new Message();
+                    message.what = ChatUpdateEvent.RECEIVE_MESSAGE;
                     message.obj = args[0].toString();
+                    messageHandler.sendMessage(message);
+                }
+            });
+            this.socket.on(ChatEvent.GET_ALL_MESSAGE, new Emitter.Listener() {
+                @Override
+                public void call(Object... args) {
+                    JSONArray array = (JSONArray) args[0];
+                    List<String> messageList = new ArrayList<>();
+                    try{
+                        for (int i=0;i< array.length(); i++) {
+                            messageList.add(array.getString(i));
+                        }
+                    } catch (Exception e) {
+                        Log.e("[WebSocket]","Message parsing error");
+                    }
+
+                    Message message = new Message();
+                    message.what = ChatUpdateEvent.UPDATE_MESSAGE;
+                    message.obj = messageList;
                     messageHandler.sendMessage(message);
                 }
             });
@@ -49,7 +73,5 @@ public class ChatClient {
         }
     }
 
-    public void send(String message) {
-        this.socket.emit(ChatEvent.NEW_MESSAGE, message);
-    }
+    public void send(String message) {this.socket.emit(ChatEvent.NEW_MESSAGE, message);}
 }

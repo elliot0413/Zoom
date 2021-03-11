@@ -29,6 +29,7 @@ import com.samguk.zoom.features.camera.CameraPreview;
 import com.samguk.zoom.features.camera.CameraStreamView;
 import com.samguk.zoom.features.chat.ChatClient;
 import com.samguk.zoom.features.chat.ChatTextAdapter;
+import com.samguk.zoom.features.chat.ChatUpdateEvent;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -102,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
         this.camera = camera;
 
         this.chatTextAdapter = new ChatTextAdapter(this);
-        this.chatTextAdapter.addMessage("hello");
+        this.chatTextAdapter.addMessage(" ");
 
         ListView chatList = new ListView(this);
         chatList.setAdapter(this.chatTextAdapter);
@@ -194,17 +195,27 @@ public class MainActivity extends AppCompatActivity {
     public void sendMessage(View view) {
         EditText editText = findViewById(R.id.message_edit);
         String message = editText.getText().toString();
-        this.chatTextAdapter.addMessage(message);
-        this.chatTextAdapter.notifyDataSetChanged();
-        editText.setText(" ");
+        this.chatClient.send(message);
+        editText.setText("");
     }
 
-    public Handler getMessageHandler(){
-        return new Handler(new Handler.Callback(){
+    public Handler getMessageHandler() {
+        return new Handler(new Handler.Callback() {
             @Override
-            public boolean handleMessage(@NonNull Message msg){
-                String message = (String) msg.obj;
-                chatTextAdapter.addMessage(message);
+            public boolean handleMessage(@NonNull Message msg) {
+                switch (msg.what) {
+                    case ChatUpdateEvent.RECEIVE_MESSAGE:
+                        String message = (String) msg.obj;
+                        chatTextAdapter.addMessage(message);
+                        break;
+                    case ChatUpdateEvent.UPDATE_MESSAGE:
+                        List<String> messageList = (List<String>) msg.obj;
+                        chatTextAdapter.updateMessage(messageList);
+                        break;
+                    default:
+                        break;
+                }
+
                 chatTextAdapter.notifyDataSetChanged();
                 return true;
             }

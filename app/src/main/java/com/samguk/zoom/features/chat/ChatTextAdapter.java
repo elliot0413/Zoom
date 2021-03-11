@@ -13,9 +13,7 @@ public class ChatTextAdapter extends BaseAdapter{
     private Context context;
     private List<String> chatTextList = new ArrayList<>();
 
-    public ChatTextAdapter(Context context) {
-        this.context = context;
-    }
+    public ChatTextAdapter(Context context) { this.context = context; }
 
     public void addMessage(String message){
         this.chatTextList.add(message);
@@ -43,6 +41,11 @@ public class ChatTextAdapter extends BaseAdapter{
         message.setText(this.chatTextList.get(position));
         return message;
     }
+    public void updateMessage(List<String> newMessageList)
+    {
+        chatTextList = newMessageList;
+    }
+
 }
 
 
